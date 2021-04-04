@@ -15,7 +15,7 @@ TagManager:
   - 
   - PostProcessing
   - Not in Reflection
-  - 
+  - Player
   - 
   - 
   - 
@@ -41,7 +41,10 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Background
+  - name: FarBackground
+    uniqueID: 2840797315
+    locked: 0
+  - name: MidBackground
     uniqueID: 41988595
     locked: 0
   - name: Gameobjects
@@ -49,4 +52,7 @@ TagManager:
     locked: 0
   - name: Foreground
     uniqueID: 3945895371
+    locked: 0
+  - name: ImmediateForeground
+    uniqueID: 837828993
     locked: 0

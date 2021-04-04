@@ -11,6 +11,9 @@ public class PlayerController : MonoBehaviour
     private BoxCollider2D boxCollider;
     [SerializeField]
     private LayerMask platformLayermask;
+    
+    [SerializeField]
+    private float playerSpeed = 1f;
 
     private void Awake()
     {
@@ -21,15 +24,19 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Space)){
+        if(IsGrounded() && Input.GetKeyDown(KeyCode.Space)){
             rb.velocity = Vector2.up * jumpVelocity;    
         }
+        rb.velocity = new Vector2(+playerSpeed, rb.velocity.y);
     }
 
     private bool IsGrounded()
     {
-        RaycastHit2D raycast = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0f, Vector2.down * 0.1f, platformLayermask);
+        RaycastHit2D raycast = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0f, Vector2.down, 1f, platformLayermask);
+        Debug.Log(raycast.collider);
         return raycast.collider != null;
     }
+
+
     
 }
