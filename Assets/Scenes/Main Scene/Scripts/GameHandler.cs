@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class GameHandler : MonoBehaviour
 {
@@ -39,6 +40,12 @@ public class GameHandler : MonoBehaviour
     // main game area container
     [SerializeField]
     private Transform gameArea;
+
+    [SerializeField]
+    private Canvas canvas;
+
+    [SerializeField]
+    private TextMeshProUGUI coinText;
     
     
     private void Awake() {
@@ -54,6 +61,8 @@ public class GameHandler : MonoBehaviour
     void Start()
     {
         tfPlayer = Instantiate(pfPlayer, new Vector3(0f, 0f, 0f), Quaternion.identity, gameArea);
+        tfPlayer.GetComponent<PlayerController>().OnCoinCollected += Player_OnCoinsCollected;
+        canvas.worldCamera = tfPlayer.GetComponent<PlayerController>().playerCam;
     }
 
     // Update is called once per frame
@@ -66,6 +75,12 @@ public class GameHandler : MonoBehaviour
             backgrounds.Add(Instantiate(pfBackground, new Vector3(lastBgPos.x + 25, lastBgPos.y, 30f), Quaternion.identity, backgroundContainer));
             platforms.Add(Instantiate(pfFlatGround, new Vector3(lastBgPos.x + 25, 0f), Quaternion.identity, groundContainer));
             SpawnCoins(lastBgPos.x + 25);
+            if(backgrounds.Count > 4){
+                Destroy(backgrounds[0]);
+                backgrounds.Remove(backgrounds[0]);
+                Destroy(platforms[0]);
+                platforms.Remove(platforms[0]);
+            }
         }
     }
 
@@ -76,5 +91,10 @@ public class GameHandler : MonoBehaviour
             float coinX = UnityEngine.Random.Range(0, 25);
             coins.Add(Instantiate(pfCoin, new Vector3(coinX + startPos, coinY, 0), Quaternion.identity, coinContainer));
         }
+    }
+
+    private void Player_OnCoinsCollected(object sender, CoinCollectedEventArg e)
+    {
+        coinText.text = e.value.ToString();
     }
 }

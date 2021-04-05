@@ -20,6 +20,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float playerSpeed = 1f;
 
+    private int coinsCollected;
+    public EventHandler<CoinCollectedEventArg> OnCoinCollected;
+
+    public Camera playerCam;
+
     private void Awake()
     {
         rb = transform.GetComponent<Rigidbody2D>();
@@ -47,9 +52,17 @@ public class PlayerController : MonoBehaviour
         Debug.Log(collider.gameObject);
         if(((1<<collider.gameObject.layer) & coinLayerMask) != 0) {
             Destroy(collider.gameObject);
+            coinsCollected++;
+            OnCoinCollected?.Invoke(this, new CoinCollectedEventArg {value = coinsCollected});
         }
     }
 
+    
+
 
     
+}
+public class CoinCollectedEventArg: EventArgs
+{
+    public int value;
 }

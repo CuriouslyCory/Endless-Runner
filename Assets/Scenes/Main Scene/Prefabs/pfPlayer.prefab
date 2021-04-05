@@ -56,6 +56,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 2048
   playerSpeed: 7
+  playerCam: {fileID: 8947801235390095410}
 --- !u!50 &8947801234671876121
 Rigidbody2D:
   serializedVersion: 4
