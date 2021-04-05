@@ -6,11 +6,16 @@ public class PlayerController : MonoBehaviour
 {
     
     private Rigidbody2D rb;
+    private BoxCollider2D boxCollider;
+
     [SerializeField]
     private float jumpVelocity = 7f;
-    private BoxCollider2D boxCollider;
+
     [SerializeField]
     private LayerMask platformLayermask;
+
+    [SerializeField]
+    private LayerMask coinLayerMask;
     
     [SerializeField]
     private float playerSpeed = 1f;
@@ -33,8 +38,16 @@ public class PlayerController : MonoBehaviour
     private bool IsGrounded()
     {
         RaycastHit2D raycast = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0f, Vector2.down, 1f, platformLayermask);
-        Debug.Log(raycast.collider);
+        //Debug.Log(raycast.collider);
         return raycast.collider != null;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collider)
+    {
+        Debug.Log(collider.gameObject);
+        if(((1<<collider.gameObject.layer) & coinLayerMask) != 0) {
+            Destroy(collider.gameObject);
+        }
     }
 
 
