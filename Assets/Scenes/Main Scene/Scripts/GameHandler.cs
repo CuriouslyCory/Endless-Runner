@@ -16,8 +16,8 @@ public class GameHandler : MonoBehaviour
     [SerializeField]
     private Transform coinContainer;
 
-    // player transform
-    private Transform tfPlayer;
+    [SerializeField]
+    private PlayerState playerState;
     
     // prefabs
     [SerializeField]
@@ -27,10 +27,10 @@ public class GameHandler : MonoBehaviour
     private GameObject pfCoin;
 
     [SerializeField]
-    private GameObject pfFlatGround;
+    private GameObject[] pfGrounds;
 
     [SerializeField]
-    private GameObject pfBackground;
+    private GameObject[] pfBackgrounds;
 
     // generated level objects
     private List<GameObject> backgrounds = new List<GameObject>();
@@ -41,28 +41,16 @@ public class GameHandler : MonoBehaviour
     [SerializeField]
     private Transform gameArea;
 
-    [SerializeField]
-    private Canvas canvas;
-
-    [SerializeField]
-    private TextMeshProUGUI coinText;
     
     
     private void Awake() {
-        backgrounds.Add(Instantiate(pfBackground, new Vector3(0f, 1.25f, 30f), Quaternion.identity, backgroundContainer));
-        backgrounds.Add(Instantiate(pfBackground, new Vector3(25f, 1.25f, 30f), Quaternion.identity, backgroundContainer));
-        platforms.Add(Instantiate(pfFlatGround, new Vector3(0,0), Quaternion.identity, groundContainer));
-        platforms.Add(Instantiate(pfFlatGround, new Vector3(25f,0), Quaternion.identity, groundContainer));
-        SpawnCoins(0f);
-        SpawnCoins(25f);
+        SpawnLevelStart();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        tfPlayer = Instantiate(pfPlayer, new Vector3(0f, 0f, 0f), Quaternion.identity, gameArea);
-        tfPlayer.GetComponent<PlayerController>().OnCoinCollected += Player_OnCoinsCollected;
-        canvas.worldCamera = tfPlayer.GetComponent<PlayerController>().playerCam;
+        SpawnPlayer();
     }
 
     // Update is called once per frame
@@ -70,11 +58,11 @@ public class GameHandler : MonoBehaviour
     {
         //Debug.Log(backgrounds.Count);
         //Debug.Log(backgrounds[backgrounds.Count - 1]);
-        if(tfPlayer.transform.position.x > backgrounds[backgrounds.Count - 1].transform.position.x - 10f){
+        if(playerState.playerObject.transform.position.x > backgrounds[backgrounds.Count - 1].transform.position.x - 10f){
             Vector3 lastBgPos = backgrounds[backgrounds.Count - 1].transform.position;
-            backgrounds.Add(Instantiate(pfBackground, new Vector3(lastBgPos.x + 25, lastBgPos.y, 30f), Quaternion.identity, backgroundContainer));
-            platforms.Add(Instantiate(pfFlatGround, new Vector3(lastBgPos.x + 25, 0f), Quaternion.identity, groundContainer));
-            SpawnCoins(lastBgPos.x + 25);
+            backgrounds.Add(Instantiate(pfBackgrounds[Random.Range(0, pfBackgrounds.Length)], new Vector3(lastBgPos.x + 30, lastBgPos.y, 30f), Quaternion.identity, backgroundContainer));
+            platforms.Add(Instantiate(pfGrounds[Random.Range(0, pfGrounds.Length)], new Vector3(lastBgPos.x + 30, 0f), Quaternion.identity, groundContainer));
+            SpawnCoins(lastBgPos.x + 30);
             if(backgrounds.Count > 4){
                 Destroy(backgrounds[0]);
                 backgrounds.Remove(backgrounds[0]);
@@ -84,17 +72,37 @@ public class GameHandler : MonoBehaviour
         }
     }
 
+    private void LateUpdate() {
+        Camera.main.transform.position = new Vector3(playerState.playerObject.transform.position.x, 3.5f, -30);
+    }
+
     private void SpawnCoins(float startPos){
         int numCoins = UnityEngine.Random.Range(5, 15);
         for (int i = 0; i < numCoins; i++) {
             float coinY = UnityEngine.Random.Range(0.5f, 2.5f);
-            float coinX = UnityEngine.Random.Range(0, 25);
+            float coinX = UnityEngine.Random.Range(0, 30);
             coins.Add(Instantiate(pfCoin, new Vector3(coinX + startPos, coinY, 0), Quaternion.identity, coinContainer));
         }
     }
 
-    private void Player_OnCoinsCollected(object sender, CoinCollectedEventArg e)
+    private void SpawnPlayer()
     {
-        coinText.text = e.value.ToString();
+        playerState.SpawnPlayer(new Vector3(0f, 0f, 0f));
+    }   
+
+    private void SpawnLevelStart()
+    {
+        backgrounds.Add(Instantiate(pfBackgrounds[0], new Vector3(0f, 1.25f, 30f), Quaternion.identity, backgroundContainer));
+        backgrounds.Add(Instantiate(pfBackgrounds[0], new Vector3(25f, 1.25f, 30f), Quaternion.identity, backgroundContainer));
+        platforms.Add(Instantiate(pfGrounds[0], new Vector3(0,0), Quaternion.identity, groundContainer));
+        platforms.Add(Instantiate(pfGrounds[0], new Vector3(30f,0), Quaternion.identity, groundContainer));
+        SpawnCoins(0f);
+        SpawnCoins(25f);
+    }
+    
+
+    private void Player_OnPlayerDeath(object sender, System.EventArgs e){
+        SpawnLevelStart();
+        SpawnPlayer();
     }
 }

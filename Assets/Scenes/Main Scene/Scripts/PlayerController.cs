@@ -20,13 +20,21 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float playerSpeed = 1f;
 
-    private int coinsCollected;
-    public EventHandler<CoinCollectedEventArg> OnCoinCollected;
-
-    public Camera playerCam;
-
+    [SerializeField]
+    GameObject pfMarker;
+    
     public float jumpTime;
     private float jumpTimeCounter;
+
+    public float markerCooldown = 2f;
+    public float markerVelocity = 5f;
+    
+    public float markerCooldownTimer {get; private set;}
+
+    public EventHandler OnPlayerDeath;
+    public EventHandler<CoinCollectedEventArg> OnCoinCollected;
+    public EventHandler OnThrowMarker;
+
 
     private enum PlayerState {
         Jumping,
@@ -71,22 +79,48 @@ public class PlayerController : MonoBehaviour
         }
 
         if(
-            !IsGrounded() && jumpTimeCounter > 0 &&
+            !IsGrounded() && jumpTimeCounter > 0 && 
             (playerState == PlayerState.Floating || playerState == PlayerState.Idle) && 
             (Input.GetKeyDown(KeyCode.Space) || Input.GetKey(KeyCode.Space))
         ){
             rb.velocity = Vector2.up * 0;
             jumpTimeCounter -= Time.deltaTime;
             playerState = PlayerState.Floating;
-        }   
+        }
+
+        if(Input.GetMouseButtonDown(0) && markerCooldownTimer <= 0){
+            Vector3 playerPosition = transform.position;
+            Vector3 mousePosition = GetWorldPositionOnPlane(Input.mousePosition, 0);
+            Vector3 direction = mousePosition - playerPosition;
+            Debug.Log(mousePosition);
+            Debug.Log(playerPosition);
+            Debug.Log(direction);
+            ThrowMarker(direction);            
+        }
+
+        if(markerCooldownTimer > 0){
+            markerCooldownTimer -= Time.deltaTime;
+        }
+
+        if(Input.GetKeyDown(KeyCode.T)){
+            Teleport();
+        }
 
 
     }
 
+    public Vector3 GetWorldPositionOnPlane(Vector3 screenPosition, float z) {
+        Ray ray = Camera.main.ScreenPointToRay(screenPosition);
+        Plane xy = new Plane(Vector3.forward, new Vector3(0, 0, z));
+        float distance;
+        xy.Raycast(ray, out distance);
+        return ray.GetPoint(distance);
+    }
+
     private bool IsGrounded()
     {
-        RaycastHit2D raycast = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0f, Vector2.down, 0.01f, platformLayermask);
-        Debug.Log(raycast.collider);
+        RaycastHit2D raycast = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0f, Vector2.down, 0.1f, platformLayermask);
+        //Debug.Log(raycast.collider);
         return raycast.collider != null;
     }
 
@@ -95,17 +129,37 @@ public class PlayerController : MonoBehaviour
         Debug.Log(collider.gameObject);
         if(((1<<collider.gameObject.layer) & coinLayerMask) != 0) {
             Destroy(collider.gameObject);
-            coinsCollected++;
-            OnCoinCollected?.Invoke(this, new CoinCollectedEventArg {value = coinsCollected});
+            OnCoinCollected?.Invoke(this, new CoinCollectedEventArg {value = 1});
         }
     }
 
-    
+    private void ThrowMarker(Vector3 direction) {
+        markerCooldownTimer = markerCooldown;
+        GameObject newMarker = Instantiate(pfMarker, transform);
+        newMarker.GetComponent<Rigidbody2D>().velocity = direction * markerVelocity;
+        OnThrowMarker?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Teleport()
+    {
+        GameObject[] marker = GameObject.FindGameObjectsWithTag("Marker");
+        if(marker.Length > 0){
+            transform.position = marker[0].transform.position;
+            Destroy(marker[0]); 
+        }
+    }
+
+    private void OnBecameInvisible() 
+    {
+        PlayerDeath();
+    }
+
+    private void PlayerDeath()
+    {
+        OnPlayerDeath?.Invoke(this, EventArgs.Empty);
+        Destroy(gameObject);
+    }
 
 
     
-}
-public class CoinCollectedEventArg: EventArgs
-{
-    public int value;
 }
