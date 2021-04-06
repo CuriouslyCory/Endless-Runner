@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ba9638e2f79e1742b9b58f4395b929a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpVelocity: 25
+  jumpVelocity: 10
   platformLayermask:
     serializedVersion: 2
     m_Bits: 64
@@ -57,6 +57,7 @@ MonoBehaviour:
     m_Bits: 2048
   playerSpeed: 7
   playerCam: {fileID: 8947801235390095410}
+  jumpTime: 0.35
 --- !u!50 &8947801234671876121
 Rigidbody2D:
   serializedVersion: 4
