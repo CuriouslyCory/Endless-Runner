@@ -18,6 +18,10 @@ public class PlayerState : MonoBehaviour
     public EventHandler OnPlayerDeath;
     public EventHandler OnThrowMarker;
 
+    public bool hasJumpped = false;
+    public bool hasThrownMarker = false;
+    public bool hasTeleported = false;
+
     
     // Start is called before the first frame update
     void Start()

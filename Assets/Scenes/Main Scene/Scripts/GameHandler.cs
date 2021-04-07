@@ -17,6 +17,9 @@ public class GameHandler : MonoBehaviour
     private Transform coinContainer;
 
     [SerializeField]
+    private Transform playerSpawnPoint;
+
+    [SerializeField]
     private PlayerState playerState;
     
     // prefabs
@@ -40,8 +43,6 @@ public class GameHandler : MonoBehaviour
     // main game area container
     [SerializeField]
     private Transform gameArea;
-
-    
     
     private void Awake() {
         SpawnLevelStart();
@@ -60,9 +61,12 @@ public class GameHandler : MonoBehaviour
         //Debug.Log(backgrounds[backgrounds.Count - 1]);
         if(playerState.playerObject.transform.position.x > backgrounds[backgrounds.Count - 1].transform.position.x - 10f){
             Vector3 lastBgPos = backgrounds[backgrounds.Count - 1].transform.position;
+            int platformSelection = playerState.hasJumpped ? pfGrounds.Length : pfGrounds.Length - 1;
             backgrounds.Add(Instantiate(pfBackgrounds[Random.Range(0, pfBackgrounds.Length)], new Vector3(lastBgPos.x + 30, lastBgPos.y, 30f), Quaternion.identity, backgroundContainer));
-            platforms.Add(Instantiate(pfGrounds[Random.Range(0, pfGrounds.Length)], new Vector3(lastBgPos.x + 30, 0f), Quaternion.identity, groundContainer));
-            SpawnCoins(lastBgPos.x + 30);
+            platforms.Add(Instantiate(pfGrounds[Random.Range(0, platformSelection)], new Vector3(lastBgPos.x + 30, 0f), Quaternion.identity, groundContainer));
+            if(playerState.hasJumpped){
+                SpawnCoins(lastBgPos.x + 30);
+            }
             if(backgrounds.Count > 4){
                 Destroy(backgrounds[0]);
                 backgrounds.Remove(backgrounds[0]);
@@ -79,7 +83,7 @@ public class GameHandler : MonoBehaviour
     private void SpawnCoins(float startPos){
         int numCoins = UnityEngine.Random.Range(5, 15);
         for (int i = 0; i < numCoins; i++) {
-            float coinY = UnityEngine.Random.Range(0.5f, 2.5f);
+            float coinY = UnityEngine.Random.Range(1f, 3.5f);
             float coinX = UnityEngine.Random.Range(0, 30);
             coins.Add(Instantiate(pfCoin, new Vector3(coinX + startPos, coinY, 0), Quaternion.identity, coinContainer));
         }
@@ -87,7 +91,7 @@ public class GameHandler : MonoBehaviour
 
     private void SpawnPlayer()
     {
-        playerState.SpawnPlayer(new Vector3(0f, 0f, 0f));
+        playerState.SpawnPlayer(playerSpawnPoint.position);
     }   
 
     private void SpawnLevelStart()

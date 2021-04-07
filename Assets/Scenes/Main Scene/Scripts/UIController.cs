@@ -19,6 +19,12 @@ public class UIController : MonoBehaviour
 
     [SerializeField]
     private PlayerState playerState;
+
+    [SerializeField]
+    private GameObject tutorialPanel;
+
+    [SerializeField]
+    private TextMeshProUGUI tutorialText;
     
     void Start()
     {
@@ -29,7 +35,12 @@ public class UIController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(Input.GetKeyDown(KeyCode.Space) && !playerState.hasJumpped){
+            playerState.hasJumpped = true;
+            tutorialText.text = "Great! Now try clicking somewhere on the screen to throw a teleport marker.";
+        }
+
+
     }
 
     public void OnClickOpenUpgradePanelButton()
@@ -62,6 +73,10 @@ public class UIController : MonoBehaviour
     private void Player_MarkerThrown(object sender, EventArgs e)
     {
         markerTimerBar.StartTimer(playerState.playerController.markerCooldownTimer);
+        if(!playerState.hasThrownMarker && playerState.hasJumpped == true){
+            playerState.hasThrownMarker = true;
+            tutorialText.text = "The red bar indicates how long until you can throw another marker.";
+        }
     }
 
 }

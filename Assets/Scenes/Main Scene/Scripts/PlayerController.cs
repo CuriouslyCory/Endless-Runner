@@ -22,7 +22,11 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     GameObject pfMarker;
-    
+
+    [SerializeField]
+    private ParticleSystem pfTeleportPop;
+    private ParticleSystem teleportPop;
+
     public float jumpTime;
     private float jumpTimeCounter;
 
@@ -144,8 +148,14 @@ public class PlayerController : MonoBehaviour
     {
         GameObject[] marker = GameObject.FindGameObjectsWithTag("Marker");
         if(marker.Length > 0){
+            if(teleportPop == null){
+                teleportPop = Instantiate(pfTeleportPop, transform.position, Quaternion.identity, transform.parent);
+            }else{
+                teleportPop.transform.position = transform.position;
+            }
+            teleportPop.Play();
             transform.position = marker[0].transform.position;
-            Destroy(marker[0]); 
+            Destroy(marker[0]);
         }
     }
 

@@ -9,7 +9,7 @@ public class CountdownTimerBar : MonoBehaviour
     private Transform timerBar;
 
     private float startTime;
-    private float currentTime;
+    private float currentTime = 0;
     
     // Start is called before the first frame update
     void Start()
